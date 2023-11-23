@@ -1,6 +1,12 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LngLat, Map, Marker } from "mapbox-gl";
+import { parse, stringify } from 'flatted'
+
+interface markLnglat {
+  mark: Marker;
+  lnglat: LngLat;
+}
 
 @Component({
   selector: 'zoom',
@@ -13,6 +19,7 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
   public zoom: number = 10;
   public map?: Map;
   public lngLat: LngLat = new LngLat(-74.5, 40);
+  public arrMarkLngLat: markLnglat[] = [];
 
   public myForm: FormGroup = this.fb.group({
     lng: [this.lngLat.lng, [Validators.required]],
@@ -20,6 +27,7 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
   });
 
   constructor(private fb: FormBuilder) { }
+
 
   ngAfterViewInit(): void {
 
@@ -69,9 +77,33 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
 
   OnSubmit() {
     if (this.myForm.invalid) return;
-    console.log(this.myForm.value);
     this.map!.setCenter(this.myForm.value);
-    new Marker().setLngLat(this.myForm.value).addTo(this.map!);
+    this.addMarker(this.myForm.value);
   }
+
+  addMarker(lnglat: LngLat, color: string = 'red') {
+    if (!this.map) return;
+    const mark = new Marker({ color }).setLngLat(lnglat).addTo(this.map);
+    this.arrMarkLngLat.push({ mark, lnglat });
+  }
+
+  goTo(lnglat: LngLat) {
+    this.map!.setCenter(lnglat);
+  }
+
+  removeItem(item: markLnglat) {
+    this.arrMarkLngLat = this.arrMarkLngLat.filter(mark => mark !== item);
+    item.mark.remove();
+  }
+
+  // setLocalStorage() {
+  //   if (localStorage.getItem(this.keyLocalStorage)) {
+  //     localStorage.removeItem(this.keyLocalStorage);
+  //     localStorage.setItem(this.keyLocalStorage, stringify(this.arrMarkLngLat));
+  //   }
+  //   localStorage.setItem(this.keyLocalStorage, stringify(this.arrMarkLngLat));
+  // }
+
+
 
 }
