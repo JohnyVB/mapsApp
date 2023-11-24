@@ -1,16 +1,7 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LngLat, Map, Marker } from "mapbox-gl";
-
-interface colorsMarks {
-  color: string;
-  mark: Marker;
-}
-
-interface PlainMarks {
-  color: string;
-  lnglat: LngLat;
-}
+import { PlainMarks, PropsAddMarker, colorsMarks } from '../../interfaces/mark.interface';
 
 @Component({
   selector: 'zoom',
@@ -28,9 +19,9 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
 
   public myForm: FormGroup = this.fb.group({
     lng: [this.lngLat.lng, [Validators.required]],
-    lat: [this.lngLat.lat, [Validators.required]]
+    lat: [this.lngLat.lat, [Validators.required]],
+    color: ['#rrggbb']
   });
-
 
   constructor(private fb: FormBuilder) { }
 
@@ -84,14 +75,22 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
   onSubmit() {
     if (this.myForm.invalid) return;
     this.map!.flyTo({ center: this.myForm.value, essential: true });
-    this.addMarker(this.myForm.value);
+    this.addMarker({ ...this.myForm.value })
   }
 
-  addMarker(lnglat: LngLat, color: string = '#xxxxxx'.replace(/x/g, y => (Math.random() * 16 | 0).toString(16))) {
+  addMarker({ lng, lat, color }: PropsAddMarker) {
     if (!this.map) return;
+
+    if (color === '#rrggbb' || color === '' || color === null) {
+      color = '#xxxxxx'.replace(/x/g, y => (Math.random() * 16 | 0).toString(16));
+    }
+
+    const lnglat: LngLat = new LngLat(lng, lat);
     const mark = new Marker({ color, draggable: true }).setLngLat(lnglat).addTo(this.map);
     this.marks.push({ color, mark });
     this.saveLocalStorage();
+
+    mark.on('dragend', () => this.saveLocalStorage());
   }
 
   goTo(lnglat: LngLat) {
@@ -100,8 +99,8 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
 
   removeItem(index: number) {
     this.marks[index].mark.remove();
-    this.marks.splice(index, 1)
-
+    this.marks.splice(index, 1);
+    this.saveLocalStorage();
   }
 
   saveLocalStorage() {
@@ -111,10 +110,6 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
 
   readLocalStorage() {
     const plainMarks: PlainMarks[] = JSON.parse(localStorage.getItem(this.keyMarksMap) ?? '[]');
-    plainMarks.forEach(({ color, lnglat }) => this.addMarker(lnglat, color))
-
+    plainMarks.forEach(({ color, lnglat }) => this.addMarker({ ...lnglat, color }))
   }
-
-
-
 }

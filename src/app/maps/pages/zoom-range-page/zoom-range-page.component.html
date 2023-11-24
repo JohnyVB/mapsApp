@@ -24,6 +24,12 @@
       <input formControlName="lat" class="form-control form-control-sm col-5" type="number">
     </div>
     <div class="col-auto">
+      <label class="form-label m-0">Color:</label>
+    </div>
+    <div class="col-auto">
+      <input formControlName="color" type="color" class="form-control form-control-color form-control-sm">
+    </div>
+    <div class="col-auto">
       <button class="btn btn-primary btn-sm">{{myForm.pristine ? 'Mark' : 'Search'}}</button>
     </div>
   </form>
