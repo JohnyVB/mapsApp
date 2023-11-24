@@ -2,8 +2,13 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } fr
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LngLat, Map, Marker } from "mapbox-gl";
 
-interface markLnglat {
-  marker: Marker;
+interface colorsMarks {
+  color: string;
+  mark: Marker;
+}
+
+interface PlainMarks {
+  color: string;
   lnglat: LngLat;
 }
 
@@ -18,7 +23,8 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
   public zoom: number = 10;
   public map?: Map;
   public lngLat: LngLat = new LngLat(-74.5, 40);
-  public arrMarkLngLat: markLnglat[] = [];
+  public marks: colorsMarks[] = [];
+  public keyMarksMap: string = 'marksMap';
 
   public myForm: FormGroup = this.fb.group({
     lng: [this.lngLat.lng, [Validators.required]],
@@ -39,8 +45,8 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
       zoom: this.zoom, // starting zoom
     });
     this.mapListeners();
+    this.readLocalStorage();
   }
-
 
   ngOnDestroy(): void {
     this.map?.remove();
@@ -83,26 +89,31 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
 
   addMarker(lnglat: LngLat, color: string = '#xxxxxx'.replace(/x/g, y => (Math.random() * 16 | 0).toString(16))) {
     if (!this.map) return;
-    const marker = new Marker({ color, draggable: true }).setLngLat(lnglat).addTo(this.map);
-    this.arrMarkLngLat.push({ marker, lnglat });
+    const mark = new Marker({ color, draggable: true }).setLngLat(lnglat).addTo(this.map);
+    this.marks.push({ color, mark });
+    this.saveLocalStorage();
   }
 
   goTo(lnglat: LngLat) {
     this.map!.flyTo({ center: lnglat, essential: true });
   }
 
-  removeItem(itemMarker: markLnglat) {
-    this.arrMarkLngLat = this.arrMarkLngLat.filter(item => item !== itemMarker);
-    itemMarker.marker.remove();
+  removeItem(index: number) {
+    this.marks[index].mark.remove();
+    this.marks.splice(index, 1)
+
   }
 
-  // setLocalStorage() {
-  //   if (localStorage.getItem(this.keyLocalStorage)) {
-  //     localStorage.removeItem(this.keyLocalStorage);
-  //     localStorage.setItem(this.keyLocalStorage, stringify(this.arrMarkLngLat));
-  //   }
-  //   localStorage.setItem(this.keyLocalStorage, stringify(this.arrMarkLngLat));
-  // }
+  saveLocalStorage() {
+    const plainMarks: PlainMarks[] = this.marks.map(({ color, mark }) => ({ color, lnglat: mark.getLngLat() }));
+    localStorage.setItem(this.keyMarksMap, JSON.stringify(plainMarks));
+  }
+
+  readLocalStorage() {
+    const plainMarks: PlainMarks[] = JSON.parse(localStorage.getItem(this.keyMarksMap) ?? '[]');
+    plainMarks.forEach(({ color, lnglat }) => this.addMarker(lnglat, color))
+
+  }
 
 
 

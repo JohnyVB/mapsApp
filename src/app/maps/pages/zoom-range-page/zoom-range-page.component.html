@@ -29,15 +29,16 @@
   </form>
 </div>
 
-@if (arrMarkLngLat.length > 0) {
+@if (marks.length > 0) {
 <ul class="list-group">
-  @for (item of arrMarkLngLat; track $index) {
+  @for (item of marks; track $index) {
   <li class="list-group-item d-flex justify-content-between align-items-center">
     <span data-bs-toggle="tooltip" data-bs-placement="left"
-      [attr.data-bs-title]="'Lng: ' + item.lnglat.lng + ' Lat: ' + item.lnglat.lat" (click)="goTo(item.lnglat)">
+      [attr.data-bs-title]="'Lng: ' + item.mark.getLngLat().lng + ' Lat: ' + item.mark.getLngLat().lat"
+      (click)="goTo(item.mark.getLngLat())">
       Mark {{$index +1}}
     </span>
-    <span class="badge bg-danger rounded-pill" (click)="removeItem(item)">X</span>
+    <span class="badge bg-danger rounded-pill" (click)="removeItem($index)">X</span>
   </li>
   }
 </ul>
