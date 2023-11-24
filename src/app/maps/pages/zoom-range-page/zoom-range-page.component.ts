@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LngLat, Map, Marker } from "mapbox-gl";
-import { parse, stringify } from 'flatted'
 
 interface markLnglat {
-  mark: Marker;
+  marker: Marker;
   lnglat: LngLat;
 }
 
@@ -26,8 +25,8 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
     lat: [this.lngLat.lat, [Validators.required]]
   });
 
-  constructor(private fb: FormBuilder) { }
 
+  constructor(private fb: FormBuilder) { }
 
   ngAfterViewInit(): void {
 
@@ -41,6 +40,7 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
     });
     this.mapListeners();
   }
+
 
   ngOnDestroy(): void {
     this.map?.remove();
@@ -75,25 +75,25 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
     this.map!.zoomTo(this.zoom);
   }
 
-  OnSubmit() {
+  onSubmit() {
     if (this.myForm.invalid) return;
-    this.map!.setCenter(this.myForm.value);
+    this.map!.flyTo({ center: this.myForm.value, essential: true });
     this.addMarker(this.myForm.value);
   }
 
-  addMarker(lnglat: LngLat, color: string = 'red') {
+  addMarker(lnglat: LngLat, color: string = '#xxxxxx'.replace(/x/g, y => (Math.random() * 16 | 0).toString(16))) {
     if (!this.map) return;
-    const mark = new Marker({ color }).setLngLat(lnglat).addTo(this.map);
-    this.arrMarkLngLat.push({ mark, lnglat });
+    const marker = new Marker({ color, draggable: true }).setLngLat(lnglat).addTo(this.map);
+    this.arrMarkLngLat.push({ marker, lnglat });
   }
 
   goTo(lnglat: LngLat) {
-    this.map!.setCenter(lnglat);
+    this.map!.flyTo({ center: lnglat, essential: true });
   }
 
-  removeItem(item: markLnglat) {
-    this.arrMarkLngLat = this.arrMarkLngLat.filter(mark => mark !== item);
-    item.mark.remove();
+  removeItem(itemMarker: markLnglat) {
+    this.arrMarkLngLat = this.arrMarkLngLat.filter(item => item !== itemMarker);
+    itemMarker.marker.remove();
   }
 
   // setLocalStorage() {

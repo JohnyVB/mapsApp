@@ -10,7 +10,7 @@
   <span class="form-label">Zoom: {{ zoom | number: '2.2-2' }}</span>
   <br>
   <!-- <span class="form-label">Lng, lat: {{lngLat.lng}} - {{lngLat.lat}}</span> -->
-  <form [formGroup]="myForm" (ngSubmit)="OnSubmit()" class="row g-1 align-items-center" autocomplete="off">
+  <form [formGroup]="myForm" (ngSubmit)="onSubmit()" class="row g-1 align-items-center" autocomplete="off">
     <div class="col-auto">
       <label class="form-label m-0">Lng:</label>
     </div>
@@ -24,7 +24,7 @@
       <input formControlName="lat" class="form-control form-control-sm col-5" type="number">
     </div>
     <div class="col-auto">
-      <button class="btn btn-primary btn-sm">Search</button>
+      <button class="btn btn-primary btn-sm">{{myForm.pristine ? 'Mark' : 'Search'}}</button>
     </div>
   </form>
 </div>
@@ -32,9 +32,11 @@
 @if (arrMarkLngLat.length > 0) {
 <ul class="list-group">
   @for (item of arrMarkLngLat; track $index) {
-  <li class="list-group-item d-flex justify-content-between align-items-center" data-bs-toggle="tooltip"
-    data-bs-placement="left" data-bs-title="'Lng: ' + item.lnglat.lng + ' Lat: ' + item.lnglat.lat">
-    <span (click)="goTo(item.lnglat)">Mark {{$index + 1}}</span>
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    <span data-bs-toggle="tooltip" data-bs-placement="left"
+      [attr.data-bs-title]="'Lng: ' + item.lnglat.lng + ' Lat: ' + item.lnglat.lat" (click)="goTo(item.lnglat)">
+      Mark {{$index +1}}
+    </span>
     <span class="badge bg-danger rounded-pill" (click)="removeItem(item)">X</span>
   </li>
   }

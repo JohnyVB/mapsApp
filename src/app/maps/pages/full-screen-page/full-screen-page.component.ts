@@ -6,6 +6,7 @@ import { Map } from 'mapbox-gl';
   templateUrl: './full-screen-page.component.html',
   styleUrl: './full-screen-page.component.css'
 })
+
 export class FullScreenPageComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('map') divMap?: ElementRef;
