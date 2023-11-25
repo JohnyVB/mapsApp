@@ -26,7 +26,8 @@ ul {
   z-index: 999;
 }
 
-span {
+.badge,
+i {
   cursor: pointer;
 }
 
