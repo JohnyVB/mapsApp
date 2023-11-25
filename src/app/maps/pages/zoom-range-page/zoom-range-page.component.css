@@ -35,10 +35,9 @@ i {
   width: 150px;
 }
 
-#drop {
+.btn-clear {
   position: fixed;
-  top: 150px;
+  bottom: 5vh;
   right: 20px;
   z-index: 999;
-  cursor: pointer;
 }

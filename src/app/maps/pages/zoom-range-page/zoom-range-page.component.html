@@ -36,6 +36,10 @@
 </div>
 
 @if (marks.length > 0) {
+<button (click)="clearMarks()" class="btn btn-danger btn-clear">
+  <i class="bi bi-trash3-fill"></i>
+  Clean map
+</button>
 <ul class="list-group">
   @for (item of marks; track $index) {
   <li class="list-group-item d-flex justify-content-between align-items-center">

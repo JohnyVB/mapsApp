@@ -16,11 +16,12 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
   public lngLat: LngLat = new LngLat(-74.5, 40);
   public marks: colorsMarks[] = [];
   public keyMarksMap: string = 'marksMap';
+  public propsMarker?: PropsAddMarker;
 
   public myForm: FormGroup = this.fb.group({
     lng: [this.lngLat.lng, [Validators.required]],
     lat: [this.lngLat.lat, [Validators.required]],
-    color: ['#rrggbb']
+    color: ['#563d7c']
   });
 
   constructor(private fb: FormBuilder) { }
@@ -55,8 +56,17 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
 
     this.map.on('move', () => {
       this.lngLat = this.map!.getCenter();
-      this.myForm.reset(this.lngLat);
+      this.propsMarker = { lng: this.lngLat.lng, lat: this.lngLat.lat, color: this.randomColor }
+      this.myForm.reset(this.propsMarker);
     });
+  }
+
+  clearMarks() {
+    this.marks.forEach(e => {
+      e.mark.remove();
+    });
+    this.marks = [];
+    this.saveLocalStorage();
   }
 
   zoomIn() {
@@ -78,12 +88,12 @@ export class ZoomRangePageComponent implements AfterViewInit, OnDestroy {
     this.addMarker({ ...this.myForm.value })
   }
 
+  get randomColor(): string {
+    return '#xxxxxx'.replace(/x/g, y => (Math.random() * 16 | 0).toString(16));
+  }
+
   addMarker({ lng, lat, color }: PropsAddMarker) {
     if (!this.map) return;
-
-    if (color === '#rrggbb' || color === '' || color === null) {
-      color = '#xxxxxx'.replace(/x/g, y => (Math.random() * 16 | 0).toString(16));
-    }
 
     const lnglat: LngLat = new LngLat(lng, lat);
     const mark = new Marker({ color, draggable: true }).setLngLat(lnglat).addTo(this.map);
